@@ -1,5 +1,6 @@
 import {ActionData, dev, ShortcutData} from "~/main";
 import {ActionDefinition, actions, actionText, missingFormalDefinition} from "~/actions";
+import {hasExternalMetadata, metadataFor} from "~/metadata";
 import {renderInlineRef, renderUnstyledValue, renderValue} from "~/value";
 import {DictionaryItem} from "~/actions/dictionary";
 import {applyStyles, renderClass, renderElement, renderText} from "~/element";
@@ -131,6 +132,14 @@ function renderAction(identifier: string, action: ActionData): Node {
         if (actionData.title) {
             identifier = actionData.title;
         }
+    } else if (hasExternalMetadata(action.WFWorkflowActionIdentifier) || hasExternalMetadata(identifier)) {
+        // Host-provided metadata gives unknown actions a titled card while
+        // parameters still render through the generic path.
+        const metadata = metadataFor(action.WFWorkflowActionIdentifier) ?? metadataFor(identifier);
+        if (metadata) {
+            actionData = metadata as ActionDefinition;
+            identifier = metadata.title ?? identifier;
+        }
     }
     if (actionData && actionData.render) {
         card.innerHTML = renderCardContent(actionData.render(card, action.WFWorkflowActionParameters ?? [])).outerHTML;
@@ -142,7 +151,7 @@ function renderAction(identifier: string, action: ActionData): Node {
 
         return card;
     }
-    if (!actionData && action.WFWorkflowActionIdentifier) {
+    if (!actionData && action.WFWorkflowActionIdentifier && !hasExternalMetadata(action.WFWorkflowActionIdentifier)) {
         missingFormalDefinition(action.WFWorkflowActionIdentifier)
     }
     const auto = document.createElement('div');

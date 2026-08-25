@@ -18,6 +18,25 @@ import {parse} from '@plist/plist';
 
 import Framework7 from 'framework7/lite/bundle';
 import {renderClass, renderElement} from "~/element";
+import {clearActionMetadata, registerActionMetadata} from "~/metadata";
+
+export {
+    clearActionMetadata,
+    hasExternalMetadata,
+    metadataFor,
+    registerActionMetadata,
+} from "~/metadata";
+export type {ExternalActionMetadata} from "~/metadata";
+
+declare global {
+    interface Window {
+        registerPreviewActionMetadata?: (entries: Record<string, object> | Array<[string, object]>) => void;
+        clearPreviewActionMetadata?: () => void;
+    }
+}
+
+window.registerPreviewActionMetadata = registerActionMetadata;
+window.clearPreviewActionMetadata = clearActionMetadata;
 
 let preview: HTMLDivElement | null;
 
