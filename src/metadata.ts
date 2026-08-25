@@ -8,6 +8,11 @@ export interface ExternalActionMetadata {
     color?: string
     background?: string
     description?: string
+    // Optional map of Shortcut plist parameter keys to human-readable
+    // parameter labels, derived from the host's shared action catalog.
+    // Present parameters of unknown actions render with these labels
+    // through the generic card instead of raw plist keys.
+    params?: { [key: string]: string }
 }
 
 interface ExternalMetadataMap {
@@ -17,7 +22,7 @@ interface ExternalMetadataMap {
 let externalMetadata: ExternalMetadataMap = {};
 
 function normalizeIdentifier(identifier: string): string {
-    return identifier.replace(/^is\.workflow\.actions\./, '').toLowerCase();
+    return identifier.toLowerCase().replace(/^is\.workflow\.actions\./, '');
 }
 
 export function registerActionMetadata(entries: ExternalMetadataMap | Array<[string, ExternalActionMetadata]>) {
@@ -50,7 +55,7 @@ export function metadataFor(identifier: string): ActionDefinitionLike | null {
         icon: metadata.icon,
         color: metadata.color,
         background: metadata.background,
-        params: {},
+        params: metadata.params ?? {},
     };
 }
 

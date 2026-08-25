@@ -345,11 +345,19 @@ export function renderListItem(image?: HTMLElement | string | null, title?: HTML
     return item;
 }
 
+// Implementation-only keys that carry no user-meaningful value in the
+// generic fallback card. Specialized renderers handle control flow.
+const volatileParameterKeys = new Set([
+    'UUID',
+    'CustomOutputName',
+    'GroupingIdentifier',
+    'WFControlFlowMode',
+]);
 export function renderParameters(actionData: ActionDefinition | null, parameters: ActionParameters): HTMLElement {
     const li = document.createElement('li');
     const ul = document.createElement('ul');
     for (let key in parameters) {
-        if (key === 'CustomOutputName' || key === 'UUID') {
+        if (volatileParameterKeys.has(key)) {
             continue;
         }
         let value = parameters[key];

@@ -35,6 +35,7 @@
         "build": "tsc && vite build",
         "build:watch": "tsc && vite build --watch",
         "dev": "vite",
+        "test": "node --experimental-strip-types --test \"test/**/*.test.ts\"",
         "prepare": "npm run build"
     },
     "devDependencies": {
