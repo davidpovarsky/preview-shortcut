@@ -34,7 +34,8 @@
     "scripts": {
         "build": "tsc && vite build",
         "build:watch": "tsc && vite build --watch",
-        "dev": "vite"
+        "dev": "vite",
+        "prepare": "npm run build"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^6.0.0",
