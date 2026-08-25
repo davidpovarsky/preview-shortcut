@@ -35,7 +35,7 @@
         "build": "tsc && vite build",
         "build:watch": "tsc && vite build --watch",
         "dev": "vite",
-        "prepare": "npm run build"
+        "prepare": "git submodule update --init --depth 1 && npm run build"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^6.0.0",
