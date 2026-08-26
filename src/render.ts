@@ -1,6 +1,7 @@
 import {ActionData, dev, ShortcutData} from "~/main";
 import {ActionDefinition, actions, actionText, missingFormalDefinition} from "~/actions";
 import {hasExternalMetadata, metadataFor} from "~/metadata";
+import {genericParameterEntries, resolveCardSource} from "~/generic-card";
 import {renderInlineRef, renderUnstyledValue, renderValue} from "~/value";
 import {DictionaryItem} from "~/actions/dictionary";
 import {applyStyles, renderClass, renderElement, renderText} from "~/element";
@@ -124,7 +125,11 @@ function renderAction(identifier: string, action: ActionData): Node {
     renderActionConnection(card, action);
 
     let actionData = null;
-    if (actions[identifier]) {
+    const source = resolveCardSource(
+        Boolean(actions[identifier]),
+        hasExternalMetadata(action.WFWorkflowActionIdentifier) || hasExternalMetadata(identifier),
+    );
+    if (source === 'definition') {
         if (dev) {
             console.log('Found definition.');
         }
@@ -132,7 +137,7 @@ function renderAction(identifier: string, action: ActionData): Node {
         if (actionData.title) {
             identifier = actionData.title;
         }
-    } else if (hasExternalMetadata(action.WFWorkflowActionIdentifier) || hasExternalMetadata(identifier)) {
+    } else if (source === 'metadata') {
         // Host-provided metadata gives unknown actions a titled card while
         // parameters still render through the generic path.
         const metadata = metadataFor(action.WFWorkflowActionIdentifier) ?? metadataFor(identifier);
@@ -345,27 +350,13 @@ export function renderListItem(image?: HTMLElement | string | null, title?: HTML
     return item;
 }
 
-// Implementation-only keys that carry no user-meaningful value in the
-// generic fallback card. Specialized renderers handle control flow.
-const volatileParameterKeys = new Set([
-    'UUID',
-    'CustomOutputName',
-    'GroupingIdentifier',
-    'WFControlFlowMode',
-]);
+// Implementation-only keys are centralized in generic-card.ts.
 export function renderParameters(actionData: ActionDefinition | null, parameters: ActionParameters): HTMLElement {
     const li = document.createElement('li');
     const ul = document.createElement('ul');
-    for (let key in parameters) {
-        if (volatileParameterKeys.has(key)) {
-            continue;
-        }
-        let value = parameters[key];
-        if (actionData && actionData.params && actionData.params[key]) {
-            // @ts-ignore
-            key = actionData.params[key];
-        }
-        ul.appendChild(renderListItem(null, key, renderValue(value, key)));
+    for (const entry of genericParameterEntries(parameters as Record<string, unknown>, actionData?.params)) {
+        // @ts-ignore
+        ul.appendChild(renderListItem(null, entry.label, renderValue(entry.value, entry.key)));
     }
     li.appendChild(ul);
 
