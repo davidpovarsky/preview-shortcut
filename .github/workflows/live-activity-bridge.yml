@@ -5,7 +5,6 @@ on:
     workflows:
       - "Build with Vite"
     types:
-      - requested
       - in_progress
       - completed
 
